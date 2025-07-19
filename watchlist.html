@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Anime Watchlist</title>
+  <style>
+    :root {
+      --bg: #f7f7fa;
+      --text: #333;
+      --card: #fff;
+      --accent: #ff66aa;
+      --delete: #ff4444;
+    }
+
+    body.dark {
+      --bg: #1e1e2f;
+      --text: #f2f2f2;
+      --card: #2c2c3a;
+      --accent: #ff66aa;
+      --delete: #e74c3c;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .toggle-btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .form-area, .search-form {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: var(--accent);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    li {
+      background-color: var(--card);
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .anime-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .anime-title strong {
+      font-size: 16px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .delete {
+      background-color: var(--delete);
+    }
+
+    .edit {
+      background-color: #3498db;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>🌸 My Anime Watchlist 🌸</h1>
+    <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  </div>
+
+  <div class="form-area">
+    <input type="text" id="animeInput" placeholder="Anime name" />
+    <select id="statusInput">
+      <option value="Watching">Watching</option>
+      <option value="Completed">Completed</option>
+      <option value="Plan to Watch">Plan to Watch</option>
+      <option value="Dropped">Dropped</option>
+    </select>
+    <input type="number" id="ratingInput" placeholder="Rating (1-10)" min="1" max="10" />
+    <button onclick="addAnime()">Add Anime</button>
+  </div>
+
+  <div class="search-form">
+    <input type="text" id="searchInput" placeholder="Search anime..." oninput="renderList()" />
+  </div>
+
+  <ul id="animeList"></ul>
+
+  <script>
+    const animeInput = document.getElementById("animeInput");
+    const statusInput = document.getElementById("statusInput");
+    const ratingInput = document.getElementById("ratingInput");
+    const searchInput = document.getElementById("searchInput");
+    const animeList = document.getElementById("animeList");
+
+    let animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    function renderList() {
+      animeList.innerHTML = "";
+      const searchTerm = searchInput.value.toLowerCase();
+      let count = 1;
+
+      animeData.forEach((anime, index) => {
+        if (anime.name.toLowerCase().includes(searchTerm)) {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div class="anime-info">
+              <div class="anime-title"><strong>${count++}. ${anime.name}</strong></div>
+              <div>Status: ${anime.status}</div>
+              <div>Rating: ${anime.rating}/10</div>
+              <div class="btns">
+                <button class="edit" onclick="editAnime(${index})">Edit</button>
+                <button class="delete" onclick="deleteAnime(${index})">Delete</button>
+              </div>
+            </div>
+          `;
+          animeList.appendChild(li);
+        }
+      });
+    }
+
+    function addAnime() {
+      const name = animeInput.value.trim();
+      const status = statusInput.value;
+      const rating = ratingInput.value.trim();
+
+      if (!name || !rating || isNaN(rating) || rating < 1 || rating > 10) {
+        alert("Please enter a valid anime name and rating (1–10).");
+        return;
+      }
+
+      animeData.push({ name, status, rating });
+      localStorage.setItem("animeData", JSON.stringify(animeData));
+      animeInput.value = "";
+      ratingInput.value = "";
+      renderList();
+    }
+
+    function deleteAnime(index) {
+      animeData.splice(index, 1);
+      localStorage.setItem("animeData", JSON.stringify(animeData));
+      renderList();
+    }
+
+    function editAnime(index) {
+      const anime = animeData[index];
+      const newName = prompt("Edit anime name:", anime.name);
+      const newStatus = prompt("Edit status (Watching, Completed, etc.):", anime.status);
+      const newRating = prompt("Edit rating (1–10):", anime.rating);
+
+      if (newName && newStatus && newRating && !isNaN(newRating) && newRating >= 1 && newRating <= 10) {
+        animeData[index] = {
+          name: newName.trim(),
+          status: newStatus.trim(),
+          rating: newRating.trim()
+        };
+        localStorage.setItem("animeData", JSON.stringify(animeData));
+        renderList();
+      } else {
+        alert("Invalid input.");
+      }
+    }
+
+    renderList();
+  </script>
+</body>
+</html>
