@@ -2,70 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📺 My Anime Watchlist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📺 My Anime & Manga Watchlist</title>
   <style>
-    /* Starry night background animation */
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0b0c24;
+      background: linear-gradient(to bottom, #1a002c, #000011);
       color: white;
-      overflow-x: hidden;
-      position: relative;
+      display: flex;
+      min-height: 100vh;
     }
 
-    /* Create stars with :before and :after pseudo elements */
-    body::before, body::after {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      z-index: -1;
-      background-repeat: repeat;
-      background-size: 3px 3px;
-      opacity: 0.3;
-      animation: twinkle 20s linear infinite;
+    /* Sidebar */
+    .sidebar {
+      width: 180px;
+      background: #2b0047;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .sidebar button {
+      background: #7b2cbf;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .sidebar button.active, .sidebar button:hover {
+      background: #9c4dff;
     }
 
-    /* Smaller stars */
-    body::before {
-      background-image:
-        radial-gradient(2px 2px at 20px 30px, white, transparent),
-        radial-gradient(2px 2px at 40px 70px, white, transparent),
-        radial-gradient(2px 2px at 60px 110px, white, transparent),
-        radial-gradient(2px 2px at 80px 150px, white, transparent),
-        radial-gradient(2px 2px at 100px 190px, white, transparent),
-        radial-gradient(2px 2px at 120px 230px, white, transparent);
-      background-size: 150px 250px;
-    }
-
-    /* Bigger stars */
-    body::after {
-      background-image:
-        radial-gradient(4px 4px at 50px 50px, white, transparent),
-        radial-gradient(3px 3px at 120px 120px, white, transparent),
-        radial-gradient(5px 5px at 200px 200px, white, transparent);
-      background-size: 200px 300px;
-      animation-duration: 30s;
-      opacity: 0.2;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-      50% { opacity: 0.7; }
-    }
-
-    .container {
+    /* Main content */
+    .main-container {
+      flex: 1;
+      padding: 20px;
       max-width: 1000px;
       margin: auto;
-      padding: 20px;
-      position: relative;
-      z-index: 1; /* above background */
     }
     h1 {
       text-align: center;
+      margin-bottom: 25px;
     }
+
+    /* Form */
     .form {
       display: flex;
       justify-content: center;
@@ -84,24 +73,31 @@
       color: white;
       cursor: pointer;
     }
+
+    /* Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 20px;
     }
-    .anime {
+
+    /* Card */
+    .card {
       background: rgba(255,255,255,0.05);
       padding: 15px;
       border-radius: 10px;
       position: relative;
+      color: white;
     }
-    .anime img {
+    .card img {
       width: 100%;
       border-radius: 10px;
     }
-    .anime h3 {
+    .card h3 {
       margin: 10px 0 5px;
     }
+
+    /* Menu */
     .menu {
       position: absolute;
       top: 10px;
@@ -114,7 +110,10 @@
       height: 30px;
       text-align: center;
       line-height: 30px;
+      user-select: none;
     }
+
+    /* Controls */
     .controls {
       display: none;
       margin-top: 10px;
@@ -127,26 +126,195 @@
       background: #c77dff;
       padding: 5px 10px;
       font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Hide inactive sections */
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✨ My Anime Watchlist</h1>
-    <div class="form">
-      <input type="text" id="animeName" placeholder="Anime Name">
-      <select id="animeStatus">
-        <option value="Watching">Watching</option>
-        <option value="Completed">Completed</option>
-        <option value="On Hold">On Hold</option>
-        <option value="Dropped">Dropped</option>
-        <option value="Plan to Watch">Plan to Watch</option>
-      </select>
-      <button onclick="addAnime()">Add Anime</button>
-    </div>
-    <div class="grid" id="animeGrid"></div>
+  <div class="sidebar">
+    <button id="btnAnime" class="active">Anime List</button>
+    <button id="btnManga">Manga List</button>
   </div>
 
-  <script src="script.js"></script>
+  <div class="main-container">
+    <h1>✨ My Watchlist</h1>
+
+    <!-- Anime Section -->
+    <section id="animeSection">
+      <div class="form">
+        <input type="text" id="animeName" placeholder="Anime Name" />
+        <select id="animeStatus">
+          <option value="Watching">Watching</option>
+          <option value="Completed">Completed</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Dropped">Dropped</option>
+          <option value="Plan to Watch">Plan to Watch</option>
+        </select>
+        <button onclick="addAnime()">Add Anime</button>
+      </div>
+      <div class="grid" id="animeGrid"></div>
+    </section>
+
+    <!-- Manga Section -->
+    <section id="mangaSection" class="hidden">
+      <div class="form">
+        <input type="text" id="mangaName" placeholder="Manga Name" />
+        <select id="mangaStatus">
+          <option value="Reading">Reading</option>
+          <option value="Completed">Completed</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Dropped">Dropped</option>
+          <option value="Plan to Read">Plan to Read</option>
+        </select>
+        <button onclick="addManga()">Add Manga</button>
+      </div>
+      <div class="grid" id="mangaGrid"></div>
+    </section>
+  </div>
+
+<script>
+  // Sidebar toggle
+  const btnAnime = document.getElementById("btnAnime");
+  const btnManga = document.getElementById("btnManga");
+  const animeSection = document.getElementById("animeSection");
+  const mangaSection = document.getElementById("mangaSection");
+
+  btnAnime.addEventListener("click", () => {
+    btnAnime.classList.add("active");
+    btnManga.classList.remove("active");
+    animeSection.classList.remove("hidden");
+    mangaSection.classList.add("hidden");
+  });
+
+  btnManga.addEventListener("click", () => {
+    btnManga.classList.add("active");
+    btnAnime.classList.remove("active");
+    mangaSection.classList.remove("hidden");
+    animeSection.classList.add("hidden");
+  });
+
+  // Toggle controls on menu click
+  document.body.addEventListener("click", function (e) {
+    if (e.target.classList.contains("menu")) {
+      const controls = e.target.closest(".card").querySelector(".controls");
+      controls.classList.toggle("show");
+    }
+  });
+
+  // Fetch anime info from Jikan API
+  async function fetchAnimeInfo(title) {
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      const data = await res.json();
+      if (data.data.length > 0) {
+        const anime = data.data[0];
+        return {
+          title: anime.title,
+          image: anime.images.jpg.image_url,
+          episodes: anime.episodes ?? 'N/A',
+          rating: anime.score ?? 0
+        };
+      }
+    } catch {
+      // ignore fetch errors
+    }
+    return { title, image: '', episodes: 'N/A', rating: 0 };
+  }
+
+  // Fetch manga info from Jikan API
+  async function fetchMangaInfo(title) {
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(title)}&limit=1`);
+      const data = await res.json();
+      if (data.data.length > 0) {
+        const manga = data.data[0];
+        return {
+          title: manga.title,
+          image: manga.images.jpg.image_url,
+          chapters: manga.chapters ?? 'N/A',
+          rating: manga.score ?? 0
+        };
+      }
+    } catch {
+      // ignore fetch errors
+    }
+    return { title, image: '', chapters: 'N/A', rating: 0 };
+  }
+
+  // Add anime card
+  async function addAnime() {
+    const name = document.getElementById("animeName").value.trim();
+    const status = document.getElementById("animeStatus").value;
+    if (!name) return alert("Please enter an anime name.");
+
+    const { title, image, episodes, rating } = await fetchAnimeInfo(name);
+
+    const box = document.createElement("div");
+    box.className = "card anime";
+    box.innerHTML = `
+      <div class="menu">⋮</div>
+      <img src="${image}" alt="${title} thumbnail" />
+      <h3>${title}</h3>
+      <p>Status: ${status}</p>
+      <p>Episodes: ${episodes}</p>
+      <p>Rating: ${rating}</p>
+      <div class="controls">
+        <button onclick="editCard(this)">Edit</button>
+        <button onclick="deleteCard(this)">Delete</button>
+      </div>
+    `;
+    document.getElementById("animeGrid").appendChild(box);
+
+    document.getElementById("animeName").value = "";
+    document.getElementById("animeStatus").value = "Watching";
+  }
+
+  // Add manga card
+  async function addManga() {
+    const name = document.getElementById("mangaName").value.trim();
+    const status = document.getElementById("mangaStatus").value;
+    if (!name) return alert("Please enter a manga name.");
+
+    const { title, image, chapters, rating } = await fetchMangaInfo(name);
+
+    const box = document.createElement("div");
+    box.className = "card manga";
+    box.innerHTML = `
+      <div class="menu">⋮</div>
+      <img src="${image}" alt="${title} thumbnail" />
+      <h3>${title}</h3>
+      <p>Status: ${status}</p>
+      <p>Chapters: ${chapters}</p>
+      <p>Rating: ${rating}</p>
+      <div class="controls">
+        <button onclick="editCard(this)">Edit</button>
+        <button onclick="deleteCard(this)">Delete</button>
+      </div>
+    `;
+    document.getElementById("mangaGrid").appendChild(box);
+
+    document.getElementById("mangaName").value = "";
+    document.getElementById("mangaStatus").value = "Reading";
+  }
+
+  // Edit card function
+  function editCard(btn) {
+    const card = btn.closest(".card");
+    const newName = prompt("Edit title:", card.querySelector("h3").textContent);
+    if (newName) {
+      card.querySelector("h3").textContent = newName;
+    }
+  }
+
+  // Delete card function
+  function deleteCard(btn) {
+    btn.closest(".card").remove();
+  }
+</script>
 </body>
 </html>
