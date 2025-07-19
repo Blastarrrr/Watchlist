@@ -5,16 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📺 My Anime Watchlist</title>
   <style>
+    /* Starry night background animation */
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, #1a002c, #000011);
+      background: #0b0c24;
       color: white;
+      overflow-x: hidden;
+      position: relative;
     }
+
+    /* Create stars with :before and :after pseudo elements */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-repeat: repeat;
+      background-size: 3px 3px;
+      opacity: 0.3;
+      animation: twinkle 20s linear infinite;
+    }
+
+    /* Smaller stars */
+    body::before {
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, white, transparent),
+        radial-gradient(2px 2px at 40px 70px, white, transparent),
+        radial-gradient(2px 2px at 60px 110px, white, transparent),
+        radial-gradient(2px 2px at 80px 150px, white, transparent),
+        radial-gradient(2px 2px at 100px 190px, white, transparent),
+        radial-gradient(2px 2px at 120px 230px, white, transparent);
+      background-size: 150px 250px;
+    }
+
+    /* Bigger stars */
+    body::after {
+      background-image:
+        radial-gradient(4px 4px at 50px 50px, white, transparent),
+        radial-gradient(3px 3px at 120px 120px, white, transparent),
+        radial-gradient(5px 5px at 200px 200px, white, transparent);
+      background-size: 200px 300px;
+      animation-duration: 30s;
+      opacity: 0.2;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
     .container {
       max-width: 1000px;
       margin: auto;
       padding: 20px;
+      position: relative;
+      z-index: 1; /* above background */
     }
     h1 {
       text-align: center;
