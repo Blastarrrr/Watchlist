@@ -27,29 +27,37 @@ async function addAnime() {
 
   const { title, image, episodes, rating } = await fetchAnimeInfo(name);
 
+  // Add to DOM
+  addAnimeToDOM({ title, image, episodes, rating, status });
+
+  saveWatchlist();
+
+  document.getElementById("animeName").value = "";
+  document.getElementById("animeStatus").value = "Watching";
+}
+
+function addAnimeToDOM(anime) {
   const box = document.createElement("div");
   box.className = "anime";
-  box.dataset.rating = rating;
+  box.dataset.rating = anime.rating;
   box.innerHTML = `
     <div class="menu">⋮</div>
-    <img src="${image}" alt="${title} thumbnail">
-    <h3>${title}</h3>
-    <p>Status: ${status}</p>
-    <p>Episodes: ${episodes}</p>
-    <p>Rating: ${rating}</p>
+    <img src="${anime.image}" alt="${anime.title} thumbnail">
+    <h3>${anime.title}</h3>
+    <p>Status: ${anime.status}</p>
+    <p>Episodes: ${anime.episodes}</p>
+    <p>Rating: ${anime.rating}</p>
     <div class="controls">
       <button onclick="editAnime(this)">Edit</button>
       <button onclick="deleteAnime(this)">Delete</button>
     </div>
   `;
   document.getElementById("animeGrid").appendChild(box);
-
-  document.getElementById("animeName").value = "";
-  document.getElementById("animeStatus").value = "Watching";
 }
 
 function deleteAnime(btn) {
   btn.closest(".anime").remove();
+  saveWatchlist();
 }
 
 function editAnime(btn) {
@@ -57,13 +65,32 @@ function editAnime(btn) {
   const newName = prompt("Edit anime name:", box.querySelector("h3").textContent);
   if (newName) {
     box.querySelector("h3").textContent = newName;
+    saveWatchlist();
   }
 }
 
-function sortByRating() {
+function saveWatchlist() {
   const grid = document.getElementById("animeGrid");
-  const cards = Array.from(grid.children);
-  cards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
-  grid.innerHTML = "";
-  cards.forEach(card => grid.appendChild(card));
+  const animes = [];
+  grid.querySelectorAll(".anime").forEach(box => {
+    animes.push({
+      title: box.querySelector("h3").textContent,
+      image: box.querySelector("img").src,
+      episodes: box.querySelector("p:nth-of-type(2)").textContent.replace("Episodes: ", ""),
+      rating: parseFloat(box.dataset.rating),
+      status: box.querySelector("p:nth-of-type(1)").textContent.replace("Status: ", "")
+    });
+  });
+  localStorage.setItem("animeWatchlist", JSON.stringify(animes));
 }
+
+function loadWatchlist() {
+  const stored = localStorage.getItem("animeWatchlist");
+  if (stored) {
+    const animes = JSON.parse(stored);
+    animes.forEach(addAnimeToDOM);
+  }
+}
+
+// Load watchlist on page load
+window.onload = loadWatchlist;
