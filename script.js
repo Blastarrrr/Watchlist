@@ -1,0 +1,102 @@
+<script>
+  document.body.addEventListener("click", function (e) {
+    if (e.target.classList.contains("menu")) {
+      const controls = e.target.closest(".anime").querySelector(".controls");
+      controls.classList.toggle("show");
+    }
+  });
+
+  async function fetchAnimeInfo(title) {
+    const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+    const data = await res.json();
+    if (data.data.length > 0) {
+      const anime = data.data[0];
+      return {
+        title: anime.title,
+        image: anime.images.jpg.image_url,
+        episodes: anime.episodes ?? 'N/A',
+        rating: anime.score ?? 0
+      };
+    }
+    return { title, image: '', episodes: 'N/A', rating: 0 };
+  }
+
+  function saveList() {
+    const grid = document.getElementById("animeGrid");
+    const cards = Array.from(grid.children).map(card => ({
+      title: card.querySelector("h3").textContent,
+      image: card.querySelector("img").src,
+      status: card.querySelector("p:nth-of-type(1)").textContent.replace("Status: ", ""),
+      episodes: card.querySelector("p:nth-of-type(2)").textContent.replace("Episodes: ", ""),
+      rating: card.querySelector("p:nth-of-type(3)").textContent.replace("Rating: ", "")
+    }));
+    localStorage.setItem("animeList", JSON.stringify(cards)); // NEW
+  }
+
+  async function addAnime() {
+    const name = document.getElementById("animeName").value.trim();
+    const status = document.getElementById("animeStatus").value;
+    if (!name) return;
+
+    const { title, image, episodes, rating } = await fetchAnimeInfo(name);
+
+    const box = createAnimeCard({ title, image, episodes, rating, status });
+    document.getElementById("animeGrid").appendChild(box);
+
+    saveList(); // NEW
+
+    document.getElementById("animeName").value = "";
+    document.getElementById("animeStatus").value = "Watching";
+  }
+
+  function deleteAnime(btn) {
+    btn.closest(".anime").remove();
+    saveList(); // NEW
+  }
+
+  function editAnime(btn) {
+    const box = btn.closest(".anime");
+    const newName = prompt("Edit anime name:", box.querySelector("h3").textContent);
+    if (newName) {
+      box.querySelector("h3").textContent = newName;
+      saveList(); // NEW
+    }
+  }
+
+  function sortByRating() {
+    const grid = document.getElementById("animeGrid");
+    const cards = Array.from(grid.children);
+    cards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+    grid.innerHTML = "";
+    cards.forEach(card => grid.appendChild(card));
+    saveList(); // NEW
+  }
+
+  function createAnimeCard({ title, image, episodes, rating, status }) {
+    const box = document.createElement("div");
+    box.className = "anime";
+    box.dataset.rating = rating;
+    box.innerHTML = `
+      <div class="menu">⋮</div>
+      <img src="${image}" alt="${title} thumbnail">
+      <h3>${title}</h3>
+      <p>Status: ${status}</p>
+      <p>Episodes: ${episodes}</p>
+      <p>Rating: ${rating}</p>
+      <div class="controls">
+        <button onclick="editAnime(this)">Edit</button>
+        <button onclick="deleteAnime(this)">Delete</button>
+      </div>
+    `;
+    return box;
+  }
+
+  // Load from localStorage on page load
+  window.onload = function () {
+    const saved = JSON.parse(localStorage.getItem("animeList") || "[]");
+    saved.forEach(data => {
+      const box = createAnimeCard(data);
+      document.getElementById("animeGrid").appendChild(box);
+    });
+  };
+</script>
