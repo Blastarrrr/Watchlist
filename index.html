@@ -26,11 +26,11 @@
     const cards = Array.from(grid.children).map(card => ({
       title: card.querySelector("h3").textContent,
       image: card.querySelector("img").src,
-      status: card.querySelector("p:nth-of-type(1)").textContent.replace("Status: ", ""),
-      episodes: card.querySelector("p:nth-of-type(2)").textContent.replace("Episodes: ", ""),
-      rating: card.querySelector("p:nth-of-type(3)").textContent.replace("Rating: ", "")
+      status: card.querySelector(".status").textContent.replace("Status: ", ""),
+      episodes: card.querySelector(".episodes").textContent.replace("Episodes: ", ""),
+      rating: card.querySelector(".rating").textContent.replace("Rating: ", "")
     }));
-    localStorage.setItem("animeList", JSON.stringify(cards)); // NEW
+    localStorage.setItem("animeList", JSON.stringify(cards));
   }
 
   async function addAnime() {
@@ -42,8 +42,7 @@
 
     const box = createAnimeCard({ title, image, episodes, rating, status });
     document.getElementById("animeGrid").appendChild(box);
-
-    saveList(); // NEW
+    saveList();
 
     document.getElementById("animeName").value = "";
     document.getElementById("animeStatus").value = "Watching";
@@ -51,7 +50,7 @@
 
   function deleteAnime(btn) {
     btn.closest(".anime").remove();
-    saveList(); // NEW
+    saveList();
   }
 
   function editAnime(btn) {
@@ -59,7 +58,7 @@
     const newName = prompt("Edit anime name:", box.querySelector("h3").textContent);
     if (newName) {
       box.querySelector("h3").textContent = newName;
-      saveList(); // NEW
+      saveList();
     }
   }
 
@@ -69,7 +68,7 @@
     cards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
     grid.innerHTML = "";
     cards.forEach(card => grid.appendChild(card));
-    saveList(); // NEW
+    saveList();
   }
 
   function createAnimeCard({ title, image, episodes, rating, status }) {
@@ -80,9 +79,9 @@
       <div class="menu">⋮</div>
       <img src="${image}" alt="${title} thumbnail">
       <h3>${title}</h3>
-      <p>Status: ${status}</p>
-      <p>Episodes: ${episodes}</p>
-      <p>Rating: ${rating}</p>
+      <p class="status">Status: ${status}</p>
+      <p class="episodes">Episodes: ${episodes}</p>
+      <p class="rating">Rating: ${rating}</p>
       <div class="controls">
         <button onclick="editAnime(this)">Edit</button>
         <button onclick="deleteAnime(this)">Delete</button>
@@ -91,7 +90,6 @@
     return box;
   }
 
-  // Load from localStorage on page load
   window.onload = function () {
     const saved = JSON.parse(localStorage.getItem("animeList") || "[]");
     saved.forEach(data => {
