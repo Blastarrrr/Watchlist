@@ -180,6 +180,113 @@
 </head>
 <body>
   <h1>📺 My Anime Watchlist</h1>
-  <!-- Further content will go here -->
+  <div class="form-container">
+    <input type="text" id="title" placeholder="Anime Title" />
+    <input type="number" id="rating" placeholder="Rating (1-10)" min="1" max="10" />
+    <select id="status">
+      <option value="Watching">Watching</option>
+      <option value="Completed">Completed</option>
+      <option value="Plan to Watch">Plan to Watch</option>
+    </select>
+    <button onclick="addAnime()">➕ Add</button>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="🔍 Search anime..." oninput="renderAnimeList()" />
+  </div>
+  <div class="anime-list" id="animeList"></div>
+  <dialog id="editDialog">
+    <input type="text" id="editTitle" placeholder="Anime Title" />
+    <input type="number" id="editRating" placeholder="Rating (1-10)" min="1" max="10" />
+    <select id="editStatus">
+      <option value="Watching">Watching</option>
+      <option value="Completed">Completed</option>
+      <option value="Plan to Watch">Plan to Watch</option>
+    </select>
+    <button onclick="saveEdit()">💾 Save</button>
+    <button onclick="closeDialog()">❌ Cancel</button>
+  </dialog>
+  <script>
+    const animeList = JSON.parse(localStorage.getItem('animeList') || '[]');
+    const animeListEl = document.getElementById('animeList');
+    let editIndex = null;
+
+    function renderAnimeList() {
+      const search = document.getElementById('search').value.toLowerCase();
+      animeListEl.innerHTML = animeList.map((anime, i) => {
+        if (!anime.title.toLowerCase().includes(search)) return '';
+        return `
+          <div class="anime-card" onclick="toggleActions(event, ${i})">
+            <button class="menu-icon">⋮</button>
+            <div class="anime-details">
+              <div class="anime-title">${i + 1}. ${anime.title}</div>
+              <div class="anime-meta">⭐ Rating: ${anime.rating || 'N/A'}</div>
+              <div class="anime-meta">📌 Status: ${anime.status || 'N/A'}</div>
+              <div class="anime-actions">
+                <button class="edit" onclick="editAnime(event, ${i})">Edit</button>
+                <button onclick="deleteAnime(event, ${i})">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addAnime() {
+      const title = document.getElementById('title').value.trim();
+      const rating = document.getElementById('rating').value;
+      const status = document.getElementById('status').value;
+      if (!title) return alert('Please enter a title.');
+      animeList.push({ title, rating, status });
+      localStorage.setItem('animeList', JSON.stringify(animeList));
+      document.getElementById('title').value = '';
+      document.getElementById('rating').value = '';
+      renderAnimeList();
+    }
+
+    function deleteAnime(e, index) {
+      e.stopPropagation();
+      animeList.splice(index, 1);
+      localStorage.setItem('animeList', JSON.stringify(animeList));
+      renderAnimeList();
+    }
+
+    function editAnime(e, index) {
+      e.stopPropagation();
+      editIndex = index;
+      const anime = animeList[index];
+      document.getElementById('editTitle').value = anime.title;
+      document.getElementById('editRating').value = anime.rating;
+      document.getElementById('editStatus').value = anime.status;
+      document.getElementById('editDialog').showModal();
+    }
+
+    function saveEdit() {
+      const title = document.getElementById('editTitle').value;
+      const rating = document.getElementById('editRating').value;
+      const status = document.getElementById('editStatus').value;
+      animeList[editIndex] = { title, rating, status };
+      localStorage.setItem('animeList', JSON.stringify(animeList));
+      closeDialog();
+      renderAnimeList();
+    }
+
+    function closeDialog() {
+      document.getElementById('editDialog').close();
+    }
+
+    function toggleActions(e, index) {
+      if (e.target.classList.contains('menu-icon')) {
+        e.stopPropagation();
+        document.querySelectorAll('.anime-card').forEach(card => card.classList.remove('show-actions'));
+        e.target.closest('.anime-card').classList.toggle('show-actions');
+      }
+    }
+
+    document.querySelector('.toggle-mode').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+    });
+
+    renderAnimeList();
+  </script>
 </body>
 </html>
