@@ -2,229 +2,197 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Anime Watchlist</title>
+  <title>My Anime Watchlist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --bg: #f7f7fa;
-      --text: #333;
-      --card: #fff;
-      --accent: #ff66aa;
-      --delete: #ff4444;
-    }
-
-    body.dark {
-      --bg: #1e1e2f;
-      --text: #f2f2f2;
-      --card: #2c2c3a;
-      --accent: #ff66aa;
-      --delete: #e74c3c;
+      --bg-light: #f5f5f5;
+      --bg-dark: #121212;
+      --text-light: #333;
+      --text-dark: #f0f0f0;
+      --card-light: #fff;
+      --card-dark: #1e1e1e;
     }
 
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: 0.3s;
+      margin: 0;
       padding: 20px;
-      transition: all 0.3s ease;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
     }
 
     h1 {
       text-align: center;
-      color: var(--accent);
+      color: #ff66aa;
     }
 
-    .top-bar {
+    .top-controls {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .toggle-btn {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .form-area, .search-form {
-      text-align: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
       margin-bottom: 20px;
     }
 
     input, select {
       padding: 10px;
-      margin: 5px;
-      width: 200px;
-      border-radius: 8px;
       border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 250px;
     }
 
     button {
-      padding: 10px 15px;
-      background-color: var(--accent);
-      border: none;
+      padding: 10px 16px;
+      background-color: #ff66aa;
       color: white;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
     }
 
-    ul {
-      list-style-type: none;
-      padding: 0;
-      max-width: 700px;
-      margin: auto;
+    .dark-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 10;
     }
 
-    li {
-      background-color: var(--card);
-      padding: 10px 15px;
-      margin: 10px 0;
-      border-radius: 6px;
+    .anime-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .anime-card {
+      background-color: var(--card-light);
+      border-radius: 10px;
+      padding: 10px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
+      transition: 0.3s;
     }
 
-    .anime-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    body.dark .anime-card {
+      background-color: var(--card-dark);
     }
 
-    .anime-title strong {
-      font-size: 16px;
+    .anime-card img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
     }
 
-    .btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 5px;
+    .anime-details {
+      padding-top: 10px;
     }
 
-    .delete {
-      background-color: var(--delete);
+    .anime-details strong {
+      color: #ff66aa;
     }
 
-    .edit {
-      background-color: #3498db;
+    .delete-btn {
+      margin-top: 8px;
+      background-color: #ff4444;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <h1>🌸 My Anime Watchlist 🌸</h1>
-    <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-  </div>
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
+  <h1>🌸 My Anime Watchlist 🌸</h1>
 
-  <div class="form-area">
-    <input type="text" id="animeInput" placeholder="Anime name" />
+  <div class="top-controls">
+    <input id="animeInput" type="text" placeholder="Anime name...">
     <select id="statusInput">
-      <option value="Watching">Watching</option>
       <option value="Completed">Completed</option>
+      <option value="Watching">Watching</option>
       <option value="Plan to Watch">Plan to Watch</option>
-      <option value="Dropped">Dropped</option>
     </select>
-    <input type="number" id="ratingInput" placeholder="Rating (1-10)" min="1" max="10" />
+    <input id="ratingInput" type="number" placeholder="Your rating (1-10)" min="1" max="10">
     <button onclick="addAnime()">Add Anime</button>
+    <input id="searchInput" type="text" placeholder="Search..." oninput="renderAnimeList()">
   </div>
 
-  <div class="search-form">
-    <input type="text" id="searchInput" placeholder="Search anime..." oninput="renderList()" />
-  </div>
-
-  <ul id="animeList"></ul>
+  <div class="anime-list" id="animeList"></div>
 
   <script>
-    const animeInput = document.getElementById("animeInput");
-    const statusInput = document.getElementById("statusInput");
-    const ratingInput = document.getElementById("ratingInput");
-    const searchInput = document.getElementById("searchInput");
-    const animeList = document.getElementById("animeList");
+    let animeList = JSON.parse(localStorage.getItem("animeWatchlist")) || [];
 
-    let animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+    const animeListEl = document.getElementById("animeList");
+    const animeInput = document.getElementById("animeInput");
+    const ratingInput = document.getElementById("ratingInput");
+    const statusInput = document.getElementById("statusInput");
+    const searchInput = document.getElementById("searchInput");
 
     function toggleDarkMode() {
       document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
     }
 
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark");
+    async function fetchThumbnail(title) {
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      const data = await res.json();
+      return data?.data?.[0]?.images?.jpg?.image_url || "";
     }
 
-    function renderList() {
-      animeList.innerHTML = "";
+    async function addAnime() {
+      const title = animeInput.value.trim();
+      const rating = ratingInput.value.trim();
+      const status = statusInput.value;
+
+      if (!title || !rating) return;
+
+      const thumbnail = await fetchThumbnail(title);
+
+      animeList.push({ title, rating, status, thumbnail });
+      localStorage.setItem("animeWatchlist", JSON.stringify(animeList));
+
+      animeInput.value = "";
+      ratingInput.value = "";
+      renderAnimeList();
+    }
+
+    function deleteAnime(index) {
+      animeList.splice(index, 1);
+      localStorage.setItem("animeWatchlist", JSON.stringify(animeList));
+      renderAnimeList();
+    }
+
+    function renderAnimeList() {
       const searchTerm = searchInput.value.toLowerCase();
-      let count = 1;
+      animeListEl.innerHTML = "";
 
-      animeData.forEach((anime, index) => {
-        if (anime.name.toLowerCase().includes(searchTerm)) {
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <div class="anime-info">
-              <div class="anime-title"><strong>${count++}. ${anime.name}</strong></div>
-              <div>Status: ${anime.status}</div>
-              <div>Rating: ${anime.rating}/10</div>
-              <div class="btns">
-                <button class="edit" onclick="editAnime(${index})">Edit</button>
-                <button class="delete" onclick="deleteAnime(${index})">Delete</button>
-              </div>
+      animeList.forEach((anime, i) => {
+        if (anime.title.toLowerCase().includes(searchTerm)) {
+          const div = document.createElement("div");
+          div.className = "anime-card";
+          div.innerHTML = `
+            <img src="${anime.thumbnail}" alt="${anime.title}" />
+            <div class="anime-details">
+              <strong>${i + 1}. ${anime.title}</strong><br>
+              Status: ${anime.status}<br>
+              Rating: ${anime.rating}/10<br>
+              <button class="delete-btn" onclick="deleteAnime(${i})">Delete</button>
             </div>
           `;
-          animeList.appendChild(li);
+          animeListEl.appendChild(div);
         }
       });
     }
 
-    function addAnime() {
-      const name = animeInput.value.trim();
-      const status = statusInput.value;
-      const rating = ratingInput.value.trim();
-
-      if (!name || !rating || isNaN(rating) || rating < 1 || rating > 10) {
-        alert("Please enter a valid anime name and rating (1–10).");
-        return;
-      }
-
-      animeData.push({ name, status, rating });
-      localStorage.setItem("animeData", JSON.stringify(animeData));
-      animeInput.value = "";
-      ratingInput.value = "";
-      renderList();
-    }
-
-    function deleteAnime(index) {
-      animeData.splice(index, 1);
-      localStorage.setItem("animeData", JSON.stringify(animeData));
-      renderList();
-    }
-
-    function editAnime(index) {
-      const anime = animeData[index];
-      const newName = prompt("Edit anime name:", anime.name);
-      const newStatus = prompt("Edit status (Watching, Completed, etc.):", anime.status);
-      const newRating = prompt("Edit rating (1–10):", anime.rating);
-
-      if (newName && newStatus && newRating && !isNaN(newRating) && newRating >= 1 && newRating <= 10) {
-        animeData[index] = {
-          name: newName.trim(),
-          status: newStatus.trim(),
-          rating: newRating.trim()
-        };
-        localStorage.setItem("animeData", JSON.stringify(animeData));
-        renderList();
-      } else {
-        alert("Invalid input.");
-      }
-    }
-
-    renderList();
+    renderAnimeList();
   </script>
 </body>
 </html>
