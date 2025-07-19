@@ -10,154 +10,76 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, #1a002c, #000011);
       color: white;
-      transition: background 0.5s, color 0.5s;
     }
-
-    .light-mode {
-      background: linear-gradient(to bottom, #ffffff, #ddeeff);
-      color: #111;
-    }
-
     .container {
-      max-width: 1200px;
+      max-width: 1000px;
       margin: auto;
       padding: 20px;
     }
-
     h1 {
       text-align: center;
-      margin-bottom: 30px;
     }
-
-    .form {
+    .form, .sort-bar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
       justify-content: center;
-      margin-bottom: 30px;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-
-    .form input, .form select {
-      padding: 8px;
+    input, select, button {
+      padding: 10px;
       border-radius: 5px;
       border: none;
-      font-size: 1em;
+      font-size: 16px;
     }
-
-    .form button {
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
+    button {
       background-color: #7b2cbf;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
-
-    .form button:hover {
-      background-color: #9d4edd;
-    }
-
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 20px;
     }
-
     .anime {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      padding: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 10px;
       position: relative;
-      overflow: hidden;
     }
-
-    .anime:hover {
-      transform: scale(1.03);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
     .anime img {
       width: 100%;
       border-radius: 10px;
-      margin-bottom: 10px;
     }
-
     .anime h3 {
-      margin: 0;
-      font-size: 1.1em;
+      margin: 10px 0 5px;
     }
-
-    .anime p {
-      margin: 5px 0;
-    }
-
     .menu {
       position: absolute;
       top: 10px;
       left: 10px;
-      background-color: rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+      font-size: 20px;
+      background: rgba(0,0,0,0.5);
       border-radius: 50%;
       width: 30px;
       height: 30px;
       text-align: center;
       line-height: 30px;
-      cursor: pointer;
     }
-
     .controls {
+      display: none;
       margin-top: 10px;
+    }
+    .controls.show {
       display: flex;
-      gap: 5px;
-      justify-content: space-between;
+      gap: 10px;
     }
-
     .controls button {
+      background: #c77dff;
       padding: 5px 10px;
-      font-size: 0.8em;
-      border: none;
-      border-radius: 5px;
-      background-color: #9d4edd;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .controls button:hover {
-      background-color: #c77dff;
-    }
-
-    .toggle-mode {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #7b2cbf;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 50px;
-      cursor: pointer;
-      border: none;
-    }
-
-    dialog {
-      padding: 20px;
-      border-radius: 10px;
-      border: none;
-      animation: popIn 0.3s ease;
-    }
-
-    @keyframes popIn {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      font-size: 14px;
     }
   </style>
 </head>
@@ -165,7 +87,7 @@
   <div class="container">
     <h1>✨ My Anime Watchlist</h1>
     <div class="form">
-      <input type="text" id="animeName" placeholder="Anime Name" />
+      <input type="text" id="animeName" placeholder="Anime Name">
       <select id="animeStatus">
         <option value="Watching">Watching</option>
         <option value="Completed">Completed</option>
@@ -173,38 +95,34 @@
         <option value="Dropped">Dropped</option>
         <option value="Plan to Watch">Plan to Watch</option>
       </select>
-      <button onclick="addAnime()">➕ Add Anime</button>
+      <button onclick="addAnime()">Add Anime</button>
+    </div>
+    <div class="sort-bar">
+      <button onclick="sortByRating()">Sort by Rating ⭐</button>
     </div>
     <div class="grid" id="animeGrid"></div>
   </div>
-  <button class="toggle-mode">Toggle Mode</button>
-
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.querySelector(".toggle-mode");
-      if (toggleBtn) {
-        toggleBtn.addEventListener("click", () => {
-          document.body.classList.toggle("light-mode");
-        });
+    document.body.addEventListener("click", function (e) {
+      if (e.target.classList.contains("menu")) {
+        const controls = e.target.closest(".anime").querySelector(".controls");
+        controls.classList.toggle("show");
       }
     });
 
     async function fetchAnimeInfo(title) {
-      try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
-        const data = await res.json();
-        if (data.data && data.data.length > 0) {
-          const anime = data.data[0];
-          return {
-            image: anime.images.jpg.image_url,
-            episodes: anime.episodes,
-            rating: anime.score ?? 'N/A'
-          };
-        }
-      } catch (e) {
-        console.error("Failed to fetch anime info", e);
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      const data = await res.json();
+      if (data.data.length > 0) {
+        const anime = data.data[0];
+        return {
+          title: anime.title,
+          image: anime.images.jpg.image_url,
+          episodes: anime.episodes ?? 'N/A',
+          rating: anime.score ?? 0
+        };
       }
-      return { image: '', episodes: 'N/A', rating: 'N/A' };
+      return { title, image: '', episodes: 'N/A', rating: 0 };
     }
 
     async function addAnime() {
@@ -212,38 +130,47 @@
       const status = document.getElementById("animeStatus").value;
       if (!name) return;
 
-      const { image, episodes, rating } = await fetchAnimeInfo(name);
+      const { title, image, episodes, rating } = await fetchAnimeInfo(name);
 
-      const grid = document.getElementById("animeGrid");
       const box = document.createElement("div");
       box.className = "anime";
+      box.dataset.rating = rating;
       box.innerHTML = `
         <div class="menu">⋮</div>
-        <img src="${image}" alt="${name} thumbnail" />
-        <h3>🌟 ${name}</h3>
-        <p>🔕 Status: ${status}</p>
-        <p>🎮 Episodes: ${episodes}</p>
-        <p>💫 Rating: ${rating}</p>
+        <img src="${image}" alt="${title} thumbnail">
+        <h3>${title}</h3>
+        <p>Status: ${status}</p>
+        <p>Episodes: ${episodes}</p>
+        <p>Rating: ${rating}</p>
         <div class="controls">
           <button onclick="editAnime(this)">Edit</button>
           <button onclick="deleteAnime(this)">Delete</button>
         </div>
       `;
-      grid.appendChild(box);
+      document.getElementById("animeGrid").appendChild(box);
 
       document.getElementById("animeName").value = "";
       document.getElementById("animeStatus").value = "Watching";
     }
 
-    function deleteAnime(button) {
-      const animeBox = button.closest(".anime");
-      animeBox.remove();
+    function deleteAnime(btn) {
+      btn.closest(".anime").remove();
     }
 
-    function editAnime(button) {
-      const box = button.closest(".anime");
-      const name = prompt("Edit anime name:", box.querySelector("h3").textContent.replace('🌟 ', ''));
-      if (name) box.querySelector("h3").textContent = `🌟 ${name}`;
+    function editAnime(btn) {
+      const box = btn.closest(".anime");
+      const newName = prompt("Edit anime name:", box.querySelector("h3").textContent);
+      if (newName) {
+        box.querySelector("h3").textContent = newName;
+      }
+    }
+
+    function sortByRating() {
+      const grid = document.getElementById("animeGrid");
+      const cards = Array.from(grid.children);
+      cards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+      grid.innerHTML = "";
+      cards.forEach(card => grid.appendChild(card));
     }
   </script>
 </body>
