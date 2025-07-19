@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Anime Watchlist</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
       color: #222;
       margin: 0;
       padding: 20px;
@@ -16,12 +16,13 @@
 
     body.dark {
       background: linear-gradient(135deg, #1e0033, #000428);
-      color: #f0f0f0;
+      color: #e0e0e0;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 10px;
+      font-size: 2rem;
     }
 
     .toggle-mode {
@@ -77,6 +78,7 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
       animation: fadeIn 0.4s ease;
     }
 
@@ -116,9 +118,32 @@
       margin-bottom: 6px;
     }
 
+    .menu-icon {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
     .anime-actions {
-      display: flex;
-      justify-content: space-between;
+      display: none;
+    }
+
+    .anime-card.show-actions .anime-actions {
+      display: block;
+      margin-top: 10px;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .anime-actions button {
@@ -131,102 +156,30 @@
     .anime-actions button.edit {
       background: #3399ff;
     }
+
+    dialog {
+      border: none;
+      border-radius: 12px;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      animation: popIn 0.3s ease forwards;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    dialog input, dialog select {
+      display: block;
+      margin-bottom: 10px;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <h1>📺 My Anime Watchlist</h1>
-  <button class="toggle-mode" onclick="toggleDarkMode()">🌗 Toggle Mode</button>
-
-  <div class="form-container">
-    <input type="text" id="titleInput" placeholder="Anime Title 🎬">
-    <input type="text" id="statusInput" placeholder="Status 📌">
-    <input type="number" id="ratingInput" placeholder="Rating ⭐" min="0" max="10">
-    <button onclick="addAnime()">➕ Add</button>
-  </div>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 Search anime..." oninput="renderAnimeList()">
-  </div>
-
-  <div class="anime-list" id="animeList"></div>
-
-  <script>
-    const animeList = JSON.parse(localStorage.getItem('animeList')) || [];
-
-    function saveList() {
-      localStorage.setItem('animeList', JSON.stringify(animeList));
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-    }
-
-    function addAnime() {
-      const title = document.getElementById('titleInput').value.trim();
-      const status = document.getElementById('statusInput').value.trim();
-      const rating = document.getElementById('ratingInput').value.trim();
-      if (!title) return;
-
-      fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`)
-        .then(res => res.json())
-        .then(data => {
-          const thumbnail = data.data?.[0]?.images?.jpg?.large_image_url || '';
-          animeList.push({ title, status, rating, thumbnail });
-          saveList();
-          renderAnimeList();
-        });
-
-      document.getElementById('titleInput').value = '';
-      document.getElementById('statusInput').value = '';
-      document.getElementById('ratingInput').value = '';
-    }
-
-    function deleteAnime(index) {
-      animeList.splice(index, 1);
-      saveList();
-      renderAnimeList();
-    }
-
-    function editAnime(index) {
-      const newTitle = prompt("New title:", animeList[index].title);
-      if (newTitle !== null) animeList[index].title = newTitle;
-
-      const newStatus = prompt("New status:", animeList[index].status);
-      if (newStatus !== null) animeList[index].status = newStatus;
-
-      const newRating = prompt("New rating:", animeList[index].rating);
-      if (newRating !== null) animeList[index].rating = newRating;
-
-      saveList();
-      renderAnimeList();
-    }
-
-    function renderAnimeList() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const listContainer = document.getElementById('animeList');
-      listContainer.innerHTML = '';
-      animeList
-        .filter(item => item.title.toLowerCase().includes(search))
-        .forEach((anime, index) => {
-          const card = document.createElement('div');
-          card.className = 'anime-card';
-          card.innerHTML = `
-            <img src="${anime.thumbnail}" alt="${anime.title}" />
-            <div class="anime-details">
-              <div class="anime-title">#${index + 1} ${anime.title}</div>
-              <div class="anime-meta">Status: ${anime.status || 'N/A'}</div>
-              <div class="anime-meta">Rating: ${anime.rating || 'N/A'}</div>
-              <div class="anime-actions">
-                <button class="edit" onclick="editAnime(${index})">✏️ Edit</button>
-                <button onclick="deleteAnime(${index})">🗑️ Delete</button>
-              </div>
-            </div>
-          `;
-          listContainer.appendChild(card);
-        });
-    }
-
-    renderAnimeList();
-  </script>
+  <!-- Further content will go here -->
 </body>
 </html>
