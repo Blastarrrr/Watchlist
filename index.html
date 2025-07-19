@@ -3,290 +3,248 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Anime Watchlist</title>
+  <title>📺 My Anime Watchlist</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      color: #222;
       margin: 0;
-      padding: 20px;
-      transition: background-color 0.3s, color 0.3s;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #1a002c, #000011);
+      color: white;
+      transition: background 0.5s, color 0.5s;
     }
 
-    body.dark {
-      background: linear-gradient(135deg, #1e0033, #000428);
-      color: #e0e0e0;
+    .light-mode {
+      background: linear-gradient(to bottom, #ffffff, #ddeeff);
+      color: #111;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
     }
 
     h1 {
       text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .form input, .form select {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1em;
+    }
+
+    .form button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background-color: #7b2cbf;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form button:hover {
+      background-color: #9d4edd;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .anime {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .anime:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .anime img {
+      width: 100%;
+      border-radius: 10px;
       margin-bottom: 10px;
-      font-size: 2rem;
+    }
+
+    .anime h3 {
+      margin: 0;
+      font-size: 1.1em;
+    }
+
+    .anime p {
+      margin: 5px 0;
+    }
+
+    .menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      cursor: pointer;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 5px;
+      justify-content: space-between;
+    }
+
+    .controls button {
+      padding: 5px 10px;
+      font-size: 0.8em;
+      border: none;
+      border-radius: 5px;
+      background-color: #9d4edd;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .controls button:hover {
+      background-color: #c77dff;
     }
 
     .toggle-mode {
       position: fixed;
-      top: 10px;
+      bottom: 20px;
       right: 20px;
-      padding: 6px 12px;
+      background: #7b2cbf;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50px;
       cursor: pointer;
       border: none;
-      background-color: #444;
-      color: white;
-      border-radius: 20px;
-      font-size: 14px;
-    }
-
-    .form-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    input, select {
-      padding: 8px;
-      font-size: 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-
-    .search-bar {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .anime-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .anime-card {
-      background-color: #fff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      animation: fadeIn 0.4s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .anime-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-
-    .anime-card img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-bottom: 1px solid #eee;
-    }
-
-    .anime-details {
-      padding: 15px;
-    }
-
-    body.dark .anime-card {
-      background-color: #2a003f;
-    }
-
-    .anime-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .anime-meta {
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-
-    .menu-icon {
-      position: absolute;
-      top: 8px;
-      left: 10px;
-      cursor: pointer;
-      font-size: 18px;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 6px;
-    }
-
-    .anime-actions {
-      display: none;
-    }
-
-    .anime-card.show-actions .anime-actions {
-      display: block;
-      margin-top: 10px;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .anime-actions button {
-      margin-right: 6px;
-      background: #ff6b6b;
-      color: white;
-      border: none;
-    }
-
-    .anime-actions button.edit {
-      background: #3399ff;
     }
 
     dialog {
-      border: none;
-      border-radius: 12px;
       padding: 20px;
-      width: 300px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      animation: popIn 0.3s ease forwards;
+      border-radius: 10px;
+      border: none;
+      animation: popIn 0.3s ease;
     }
 
     @keyframes popIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    dialog input, dialog select {
-      display: block;
-      margin-bottom: 10px;
-      width: 100%;
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
   </style>
 </head>
 <body>
-  <h1>📺 My Anime Watchlist</h1>
-  <div class="form-container">
-    <input type="text" id="title" placeholder="Anime Title" />
-    <input type="number" id="rating" placeholder="Rating (1-10)" min="1" max="10" />
-    <select id="status">
-      <option value="Watching">Watching</option>
-      <option value="Completed">Completed</option>
-      <option value="Plan to Watch">Plan to Watch</option>
-    </select>
-    <button onclick="addAnime()">➕ Add</button>
+  <div class="container">
+    <h1>✨ My Anime Watchlist</h1>
+    <div class="form">
+      <input type="text" id="animeName" placeholder="Anime Name" />
+      <select id="animeStatus">
+        <option value="Watching">Watching</option>
+        <option value="Completed">Completed</option>
+        <option value="On Hold">On Hold</option>
+        <option value="Dropped">Dropped</option>
+        <option value="Plan to Watch">Plan to Watch</option>
+      </select>
+      <button onclick="addAnime()">➕ Add Anime</button>
+    </div>
+    <div class="grid" id="animeGrid"></div>
   </div>
-  <div class="search-bar">
-    <input type="text" id="search" placeholder="🔍 Search anime..." oninput="renderAnimeList()" />
-  </div>
-  <div class="anime-list" id="animeList"></div>
-  <dialog id="editDialog">
-    <input type="text" id="editTitle" placeholder="Anime Title" />
-    <input type="number" id="editRating" placeholder="Rating (1-10)" min="1" max="10" />
-    <select id="editStatus">
-      <option value="Watching">Watching</option>
-      <option value="Completed">Completed</option>
-      <option value="Plan to Watch">Plan to Watch</option>
-    </select>
-    <button onclick="saveEdit()">💾 Save</button>
-    <button onclick="closeDialog()">❌ Cancel</button>
-  </dialog>
+  <button class="toggle-mode">Toggle Mode</button>
+
   <script>
-    const animeList = JSON.parse(localStorage.getItem('animeList') || '[]');
-    const animeListEl = document.getElementById('animeList');
-    let editIndex = null;
-
-    function renderAnimeList() {
-      const search = document.getElementById('search').value.toLowerCase();
-      animeListEl.innerHTML = animeList.map((anime, i) => {
-        if (!anime.title.toLowerCase().includes(search)) return '';
-        return `
-          <div class="anime-card" onclick="toggleActions(event, ${i})">
-            <button class="menu-icon">⋮</button>
-            <div class="anime-details">
-              <div class="anime-title">${i + 1}. ${anime.title}</div>
-              <div class="anime-meta">⭐ Rating: ${anime.rating || 'N/A'}</div>
-              <div class="anime-meta">📌 Status: ${anime.status || 'N/A'}</div>
-              <div class="anime-actions">
-                <button class="edit" onclick="editAnime(event, ${i})">Edit</button>
-                <button onclick="deleteAnime(event, ${i})">Delete</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function addAnime() {
-      const title = document.getElementById('title').value.trim();
-      const rating = document.getElementById('rating').value;
-      const status = document.getElementById('status').value;
-      if (!title) return alert('Please enter a title.');
-      animeList.push({ title, rating, status });
-      localStorage.setItem('animeList', JSON.stringify(animeList));
-      document.getElementById('title').value = '';
-      document.getElementById('rating').value = '';
-      renderAnimeList();
-    }
-
-    function deleteAnime(e, index) {
-      e.stopPropagation();
-      animeList.splice(index, 1);
-      localStorage.setItem('animeList', JSON.stringify(animeList));
-      renderAnimeList();
-    }
-
-    function editAnime(e, index) {
-      e.stopPropagation();
-      editIndex = index;
-      const anime = animeList[index];
-      document.getElementById('editTitle').value = anime.title;
-      document.getElementById('editRating').value = anime.rating;
-      document.getElementById('editStatus').value = anime.status;
-      document.getElementById('editDialog').showModal();
-    }
-
-    function saveEdit() {
-      const title = document.getElementById('editTitle').value;
-      const rating = document.getElementById('editRating').value;
-      const status = document.getElementById('editStatus').value;
-      animeList[editIndex] = { title, rating, status };
-      localStorage.setItem('animeList', JSON.stringify(animeList));
-      closeDialog();
-      renderAnimeList();
-    }
-
-    function closeDialog() {
-      document.getElementById('editDialog').close();
-    }
-
-    function toggleActions(e, index) {
-      if (e.target.classList.contains('menu-icon')) {
-        e.stopPropagation();
-        document.querySelectorAll('.anime-card').forEach(card => card.classList.remove('show-actions'));
-        e.target.closest('.anime-card').classList.toggle('show-actions');
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.querySelector(".toggle-mode");
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          document.body.classList.toggle("light-mode");
+        });
       }
-    }
-
-    document.querySelector('.toggle-mode').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
     });
 
-    renderAnimeList();
+    async function fetchAnimeInfo(title) {
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+        const data = await res.json();
+        if (data.data && data.data.length > 0) {
+          const anime = data.data[0];
+          return {
+            image: anime.images.jpg.image_url,
+            episodes: anime.episodes,
+            rating: anime.score ?? 'N/A'
+          };
+        }
+      } catch (e) {
+        console.error("Failed to fetch anime info", e);
+      }
+      return { image: '', episodes: 'N/A', rating: 'N/A' };
+    }
+
+    async function addAnime() {
+      const name = document.getElementById("animeName").value.trim();
+      const status = document.getElementById("animeStatus").value;
+      if (!name) return;
+
+      const { image, episodes, rating } = await fetchAnimeInfo(name);
+
+      const grid = document.getElementById("animeGrid");
+      const box = document.createElement("div");
+      box.className = "anime";
+      box.innerHTML = `
+        <div class="menu">⋮</div>
+        <img src="${image}" alt="${name} thumbnail" />
+        <h3>🌟 ${name}</h3>
+        <p>🔕 Status: ${status}</p>
+        <p>🎮 Episodes: ${episodes}</p>
+        <p>💫 Rating: ${rating}</p>
+        <div class="controls">
+          <button onclick="editAnime(this)">Edit</button>
+          <button onclick="deleteAnime(this)">Delete</button>
+        </div>
+      `;
+      grid.appendChild(box);
+
+      document.getElementById("animeName").value = "";
+      document.getElementById("animeStatus").value = "Watching";
+    }
+
+    function deleteAnime(button) {
+      const animeBox = button.closest(".anime");
+      animeBox.remove();
+    }
+
+    function editAnime(button) {
+      const box = button.closest(".anime");
+      const name = prompt("Edit anime name:", box.querySelector("h3").textContent.replace('🌟 ', ''));
+      if (name) box.querySelector("h3").textContent = `🌟 ${name}`;
+    }
   </script>
 </body>
 </html>
