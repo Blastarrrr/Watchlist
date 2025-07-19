@@ -14,7 +14,7 @@ async function fetchAnimeInfo(title) {
       title: anime.title,
       image: anime.images.jpg.image_url,
       episodes: anime.episodes ?? 'N/A',
-      rating: anime.score ?? 0
+      rating: anime.score ?? 0,
     };
   }
   return { title, image: '', episodes: 'N/A', rating: 0 };
@@ -27,7 +27,6 @@ async function addAnime() {
 
   const { title, image, episodes, rating } = await fetchAnimeInfo(name);
 
-  // Add to DOM
   addAnimeToDOM({ title, image, episodes, rating, status });
 
   saveWatchlist();
@@ -42,7 +41,7 @@ function addAnimeToDOM(anime) {
   box.dataset.rating = anime.rating;
   box.innerHTML = `
     <div class="menu">⋮</div>
-    <img src="${anime.image}" alt="${anime.title} thumbnail">
+    <img src="${anime.image}" alt="${anime.title} thumbnail" />
     <h3>${anime.title}</h3>
     <p>Status: ${anime.status}</p>
     <p>Episodes: ${anime.episodes}</p>
@@ -92,5 +91,4 @@ function loadWatchlist() {
   }
 }
 
-// Load watchlist on page load
 window.onload = loadWatchlist;
