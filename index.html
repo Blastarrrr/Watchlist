@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Anime Watchlist</title>
   <style>
     body {
@@ -72,11 +72,13 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
     }
 
     .anime-card:hover {
-      transform: scale(1.02);
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .anime-card img {
@@ -101,6 +103,22 @@
     .anime-meta {
       font-size: 14px;
       margin-bottom: 3px;
+    }
+
+    .anime-actions {
+      margin-top: 8px;
+    }
+
+    .anime-actions button {
+      margin-right: 5px;
+      background: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 3px;
+    }
+
+    .anime-actions button.edit {
+      background: #0275d8;
     }
   </style>
 </head>
@@ -137,15 +155,22 @@
       const title = document.getElementById("animeTitle").value.trim();
       const status = document.getElementById("status").value;
       const rating = document.getElementById("rating").value;
-
       if (!title) return alert("Enter an anime title!");
 
       try {
         const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
         const data = await res.json();
-        const image = data.data?.[0]?.images?.webp?.large_image_url || data.data?.[0]?.images?.jpg?.image_url || "";
+        const anime = data.data?.[0];
+        if (!anime) return alert("Anime not found.");
 
-        animeList.push({ title, status, rating, image });
+        animeList.push({
+          title,
+          status,
+          rating,
+          image: anime.images.webp.large_image_url,
+          episodes: anime.episodes || "?"
+        });
+
         localStorage.setItem("animeList", JSON.stringify(animeList));
         renderList();
         document.getElementById("animeTitle").value = "";
@@ -153,6 +178,25 @@
       } catch (e) {
         alert("Failed to fetch image or add anime.");
         console.error(e);
+      }
+    }
+
+    function deleteAnime(index) {
+      if (confirm("Delete this anime?")) {
+        animeList.splice(index, 1);
+        localStorage.setItem("animeList", JSON.stringify(animeList));
+        renderList();
+      }
+    }
+
+    function editAnime(index) {
+      const newStatus = prompt("Edit Status:", animeList[index].status);
+      const newRating = prompt("Edit Rating:", animeList[index].rating);
+      if (newStatus !== null && newRating !== null) {
+        animeList[index].status = newStatus;
+        animeList[index].rating = newRating;
+        localStorage.setItem("animeList", JSON.stringify(animeList));
+        renderList();
       }
     }
 
@@ -173,6 +217,11 @@
               <div class="anime-title">${i + 1}. ${anime.title}</div>
               <div class="anime-meta">Status: ${anime.status}</div>
               <div class="anime-meta">Rating: ${anime.rating}/10</div>
+              <div class="anime-meta">Episodes: ${anime.episodes}</div>
+              <div class="anime-actions">
+                <button onclick="editAnime(${i})" class="edit">Edit</button>
+                <button onclick="deleteAnime(${i})">Delete</button>
+              </div>
             </div>
           `;
 
